@@ -11,7 +11,7 @@ from time import time
 import os
 #here is the key import!
 from IPython.parallel import Client
-
+from time import sleep
 
 def do_grid_map_gates_to_grid(radar_fname):
     import pyart
@@ -20,7 +20,7 @@ def do_grid_map_gates_to_grid(radar_fname):
     import numpy as np
     from time import time
     import os
-    md = '/lcrc/group/earthscience/radar/nexrad/chicago_floods/'
+    md = '/lcrc/group/earthscience/radar/chicago_stationary/'
     try:
         radar = pyart.io.read(radar_fname)
         rain_z = radar.fields['reflectivity']['data'].copy()
@@ -84,7 +84,9 @@ def do_grid_map_gates_to_grid(radar_fname):
         pass
     return 0
 
-md = '/lcrc/group/earthscience/radar/nexrad/chicago_floods/'
+print('Exex')
+
+md = '/lcrc/group/earthscience/radar/chicago_stationary/'
 idir = md
 filelist = os.listdir(md)
 good_files = []
@@ -92,9 +94,17 @@ for fl in filelist:
     if 'KLOT' in fl:
         good_files.append(idir + fl)
 good_files.sort()
+state = 0
+while state == 0:
+    try:
+        My_Cluster = Client()
+        My_View = My_Cluster[:]
+        state = 1
+    except:
+        state = 0
+        print('Cluster not ready for me')
+    sleep(10)
 
-My_Cluster = Client()
-My_View = My_Cluster[:]
 print My_View
 print len(My_View)
 
