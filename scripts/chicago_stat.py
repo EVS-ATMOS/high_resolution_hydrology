@@ -22,6 +22,10 @@ def do_grid_map_gates_to_grid(radar_fname):
     import os
     md = '/lcrc/group/earthscience/radar/chicago_stationary/'
     try:
+        max_lat = 42.
+        min_lat = 40.
+        min_lon = -89
+        max_lon = -87
         radar = pyart.io.read(radar_fname)
         rain_z = radar.fields['reflectivity']['data'].copy()
         z_lin = 10.0**(radar.fields['reflectivity']['data']/10.)
@@ -33,8 +37,8 @@ def do_grid_map_gates_to_grid(radar_fname):
         radar.fields['rain_z']['valid_min'] = 0
         radar.fields['rain_z']['valid_max'] = 500
         grid = pyart.map.grid_from_radars(
-             (radar,), grid_shape=(1, 501, 501),
-            grid_limits=((0, 0),(-50000, 50000), (-50000, 50000)),
+             (radar,), grid_shape=(35, 1001, 1001),
+            grid_limits=((0, 17000),(-100000, 100000), (-100000, 100000)),
             fields=radar.fields.keys(), gridding_algo="map_gates_to_grid",
             weighting_function='BARNES')
         dts = num2date(grid.axes['time']['data'], grid.axes['time']['units'])
@@ -43,11 +47,11 @@ def do_grid_map_gates_to_grid(radar_fname):
         myd = pyart.graph.RadarMapDisplay(radar)
         fig = plt.figure(figsize = [18,10])
         myd.plot_ppi_map( 'rain_z', vmin = 0, vmax = 100,
-                         resolution = 'h', max_lat = 41.8,
-                         min_lat = 41.25, min_lon = -88.3, max_lon = -87.5)
+                         resolution = 'h', max_lat = max_lat,
+                         min_lat = min_lat, min_lon = min_lon, max_lon = max_lon)
         m = myd.basemap
-        m.drawparallels(np.linspace(41, 42, 9),labels=[1,0,0,0])
-        m.drawmeridians(np.linspace(-88.4, -87, 8),labels=[0,0,0,1])
+        m.drawparallels(np.arange(min_lat,max_lat, 1),labels=[1,0,0,0])
+        m.drawmeridians(np.arange(min_lon,max_lon, 1),labels=[0,0,0,1])
         m.drawrivers()
         m.drawcounties()
         m.drawstates()
@@ -59,13 +63,9 @@ def do_grid_map_gates_to_grid(radar_fname):
         plt.savefig(md+ 'radar_'+sstr+'.png')
         plt.close(fig)
         fig = plt.figure(figsize = [15,15])
-        max_lat = 43
-        min_lat = 41.5
-        min_lon = -88.3
-        max_lon = -87.5
         display = pyart.graph.GridMapDisplay(grid)
-        display.plot_basemap(lat_lines=np.arange(min_lat,max_lat,.1),
-                             lon_lines=np.arange(min_lon, max_lon, .1),
+        display.plot_basemap(lat_lines=np.arange(min_lat,max_lat,1),
+                             lon_lines=np.arange(min_lon, max_lon, 1),
                              resolution='h')
         display.plot_grid('rain_z', vmin=0, vmax=100)
         xcf,ycf = display.basemap(-87.9706,41.6815)
@@ -78,6 +78,51 @@ def do_grid_map_gates_to_grid(radar_fname):
         display.plot_colorbar()
         plt.savefig(md+ 'mapped_250_'+sstr+'.png')
         plt.close(fig)
+        display = pyart.graph.GridMapDisplay(grid, debug=True)
+
+        fig = plt.figure(figsize=[15, 8])
+
+        # panel sizes
+        map_panel_axes = [0.05, 0.05, .4, .80]
+        x_cut_panel_axes = [0.55, 0.10, .4, .30]
+        y_cut_panel_axes = [0.55, 0.50, .4, .30]
+        colorbar_panel_axes = [0.05, 0.90, .4, .03]
+
+        # parameters
+        level = 2
+        vmin = 0.10
+        vmax = 180
+        lat = 41.6815
+        lon = -87.9706
+
+        # panel 1, basemap, radar reflectivity and NARR overlay
+        ax1 = fig.add_axes(map_panel_axes)
+        display.plot_basemap(lat_lines=np.arange(min_lat,max_lat,1),
+                             lon_lines=np.arange(min_lon, max_lon, 1),
+                             resolution='h')
+        display.plot_grid('reflectivity', level=level, vmin=-8, vmax=64)
+        display.plot_crosshairs(lon=lon, lat=lat)
+        cbax = fig.add_axes(colorbar_panel_axes)
+        display.plot_colorbar(cax=cbax)
+
+        # panel 2, longitude slice.
+        ax2 = fig.add_axes(x_cut_panel_axes)
+        display.plot_longitude_slice('reflectivity', lon=lon, lat=lat, vmin=-8, vmax=64)
+        ax2.set_xlabel('Distance from Argonne(km)')
+
+        # panel 3, latitude slice
+        ax3 = fig.add_axes(y_cut_panel_axes)
+        display.plot_latitude_slice('reflectivity', lon=lon, lat=lat, vmin=-8, vmax=64)
+
+        # add a title
+        slc_height = grid.axes['z_disp']['data'][level]
+        dts = num2date(grid.axes['time']['data'], grid.axes['time']['units'])
+        datestr = dts[0].strftime('%H:%M Z on %Y-%m-%d')
+        title = 'Sliced at ' + str(slc_height) + ' meters at ' + datestr
+        fig.text(0.5, 0.9, title)
+        plt.savefig(md + 'mapped_3d_250_'+sstr+'.png')
+        plt.close(fig)
+
         del(radar)
         del(grid)
     except:
@@ -115,7 +160,7 @@ My_View.block = False
 My_View.execute('import matplotlib')
 My_View.execute('matplotlib.use("agg")')
 
-
+t1 = time()
 
 
 #Map the code and input to all workers
@@ -123,5 +168,9 @@ result = My_View.map_async(do_grid_map_gates_to_grid, good_files)
 
 #Reduce the result to get a list of output
 qvps = result.get()
+tt = time() - t1
+print(tt)
+print(tt/len(good_files))
+
 
 
