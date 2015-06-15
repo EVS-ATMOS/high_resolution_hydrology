@@ -115,5 +115,5 @@ result = My_View.map_async(do_grid_map_gates_to_grid, good_files)
 qvps = result.get()
 tt = time() - t1
 print(tt)
-print(tt/len(good_files)
+print(tt/len(good_files))
 
