@@ -71,7 +71,6 @@ def do_grid_map_gates_to_grid(radar_fname):
         m.drawrivers()
         m.drawcounties()
         m.drawstates()
-        
         plt.savefig(md+ 'radar_'+sstr+'.png')
         plt.close(fig)
         fig = plt.figure(figsize = [15,15])
@@ -82,7 +81,6 @@ def do_grid_map_gates_to_grid(radar_fname):
         display.plot_grid('rain_z', vmin=0, vmax=100)
         display.basemap.drawcounties()
         display.basemap.drawrivers()
-        display.plot_colorbar()
         plt.savefig(md+ 'mapped_250_'+sstr+'.png')
         plt.close(fig)
         del(radar)
@@ -124,7 +122,7 @@ My_View.execute('matplotlib.use("agg")')
 
 
 #Map the code and input to all workers
-result = My_View.map_async(do_grid_map_gates_to_grid, good_files[0:20])
+result = My_View.map_async(do_grid_map_gates_to_grid, good_files)
 
 #Reduce the result to get a list of output
 qvps = result.get()
