@@ -83,6 +83,12 @@ def do_grid_map_gates_to_grid(radar_fname):
         display.basemap.drawrivers()
         plt.savefig(md+ 'mapped_250_'+sstr+'.png')
         plt.close(fig)
+        max_r = grid.fields['rain_z']['data'].max()
+        mean_r = grid.fields['rain_z']['data'].mean()
+        stttr = '{} {}'.format(max_r, mean_r)
+        fh = open(tf, 'w')
+        fh.write(stttr + ' \n')
+        fh.close()
         del(radar)
         del(grid)
     except:
