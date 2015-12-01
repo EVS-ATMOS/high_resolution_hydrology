@@ -27,6 +27,9 @@ def do_grid_map_gates_to_grid(radar_fname):
         fh.write('READING' + radar_fname + ' \n')
         fh.close()
         radar = pyart.io.read(radar_fname)
+        fh = open(tf, 'w')
+        fh.write('Calcs \n')
+        fh.close()
         gatefilter = pyart.correct.GateFilter(radar)
         gatefilter.exclude_masked('reflectivity')
         gatefilter.exclude_below('cross_correlation_ratio', 0.75)
@@ -93,14 +96,19 @@ for fl in filelist:
     if 'KGYX' in fl:
         good_files.append(idir + fl)
 good_files.sort()
-try:
-    My_Cluster = Client()
-    My_View = My_Cluster[:]
-    print My_View
-    print len(My_View)
-except:
-    print('no!')
-    sleep(5)
+
+good = False
+while not good:
+    try:
+        My_Cluster = Client()
+        My_View = My_Cluster[:]
+        print My_View
+        print len(My_View)
+        good = True
+    except:
+        print('no!')
+        sleep(5)
+        good = False
 
 #Turn off blocking so all engines can work async
 My_View.block = False
