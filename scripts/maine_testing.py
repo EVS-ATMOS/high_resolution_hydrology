@@ -89,11 +89,11 @@ good_files.sort()
 try:
     My_Cluster = Client()
     My_View = My_Cluster[:]
+    print My_View
+    print len(My_View)
 except:
     print('no!')
     sleep(5)
-print My_View
-print len(My_View)
 
 #Turn off blocking so all engines can work async
 My_View.block = False
