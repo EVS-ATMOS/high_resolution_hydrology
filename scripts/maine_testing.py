@@ -22,9 +22,9 @@ def do_grid_map_gates_to_grid(radar_fname):
     import os
     md = '/lcrc/group/earthscience/radar/maine_out/'
     try:
-        tf = md + radar_fname.split('/')[-1]
+        tf = md + radar_fname.split('/')[-1]+'.status'
         fh = open(tf, 'w')
-        fh.write('READING \n')
+        fh.write('READING' + radar_fname + ' \n')
         fh.close()
         radar = pyart.io.read(radar_fname)
         gatefilter = pyart.correct.GateFilter(radar)
