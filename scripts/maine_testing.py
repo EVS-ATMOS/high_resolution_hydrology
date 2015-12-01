@@ -87,7 +87,7 @@ def do_grid_map_gates_to_grid(radar_fname):
         mean_r = grid.fields['rain_z']['data'].mean()
         stttr = '{} {}'.format(max_r, mean_r)
         fh = open(tf, 'w')
-        fh.write(stttr + ' \n')
+        fh.write(radar_fname.split('/')[-1] + stttr + ' \n')
         fh.close()
         del(radar)
         del(grid)
