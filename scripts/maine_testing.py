@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 from netCDF4 import num2date, date2num
 import numpy as np
-from time import time
+from time import time, sleep
 import os
 #here is the key import!
 from IPython.parallel import Client
@@ -91,7 +91,7 @@ try:
     My_View = My_Cluster[:]
 except:
     print('no!')
-    time.sleep(5)
+    sleep(5)
 print My_View
 print len(My_View)
 
