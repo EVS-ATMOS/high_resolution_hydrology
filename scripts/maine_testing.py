@@ -86,9 +86,12 @@ for fl in filelist:
     if 'KGYX' in fl:
         good_files.append(idir + fl)
 good_files.sort()
-
-My_Cluster = Client()
-My_View = My_Cluster[:]
+try:
+    My_Cluster = Client()
+    My_View = My_Cluster[:]
+except:
+    print('no!')
+    time.sleep(5)
 print My_View
 print len(My_View)
 
