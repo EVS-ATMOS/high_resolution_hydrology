@@ -35,14 +35,6 @@ def do_grid_map_gates_to_grid(radar_fname):
         radar.fields['rain_z']['long_name'] = 'rainfall_rate_from_z'
         radar.fields['rain_z']['valid_min'] = 0
         radar.fields['rain_z']['valid_max'] = 500
-        grid = pyart.map.grid_from_radars(
-             (radar,), grid_shape=(1, 501, 501),
-            grid_limits=((0, 0),(-50000, 50000), (-50000, 50000)),
-            fields=radar.fields.keys(), gridding_algo="map_gates_to_grid",
-            weighting_function='BARNES', gatefilters = (gatefilter,))
-        dts = num2date(grid.axes['time']['data'], grid.axes['time']['units'])
-        sstr = dts[0].strftime('%Y%m%d_%H%M%S')
-        pyart.io.write_grid(md + 'grid_250_'+sstr+'.nc', grid)
         min_lat = 43
         min_lon = -72
         max_lon = -69
@@ -61,6 +53,14 @@ def do_grid_map_gates_to_grid(radar_fname):
         
         plt.savefig(md+ 'radar_'+sstr+'.png')
         plt.close(fig)
+        grid = pyart.map.grid_from_radars(
+             (radar,), grid_shape=(1, 501, 501),
+            grid_limits=((0, 0),(-50000, 50000), (-50000, 50000)),
+            fields=radar.fields.keys(), gridding_algo="map_gates_to_grid",
+            weighting_function='BARNES', gatefilters = (gatefilter,))
+        dts = num2date(grid.axes['time']['data'], grid.axes['time']['units'])
+        sstr = dts[0].strftime('%Y%m%d_%H%M%S')
+        pyart.io.write_grid(md + 'grid_250_'+sstr+'.nc', grid)
         fig = plt.figure(figsize = [15,15])
         display = pyart.graph.GridMapDisplay(grid)
         display.plot_basemap(lat_lines=np.arange(min_lat,max_lat,.1),
