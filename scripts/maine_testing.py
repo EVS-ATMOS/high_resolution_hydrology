@@ -32,7 +32,7 @@ def do_grid_map_gates_to_grid(radar_fname):
         fh.close()
         gatefilter = pyart.correct.GateFilter(radar)
         gatefilter.exclude_masked('reflectivity')
-        gatefilter.exclude_below('cross_correlation_ratio', 0.75)
+        #gatefilter.exclude_below('cross_correlation_ratio', 0.75)
         rain_z = radar.fields['reflectivity']['data'].copy()
         z_lin = 10.0**(radar.fields['reflectivity']['data']/10.)
         rain_z = (z_lin/300.0)**(1./1.4)  #Z=300 R1.4
