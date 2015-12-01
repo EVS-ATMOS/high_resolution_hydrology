@@ -47,6 +47,17 @@ def do_grid_map_gates_to_grid(radar_fname):
         max_lon = -69
         max_lat = 45
         fh = open(tf, 'w')
+        fh.write('GRIDDING \n')
+        fh.close()
+        grid = pyart.map.grid_from_radars(
+             (radar,), grid_shape=(1, 501, 501),
+            grid_limits=((0, 0),(-50000, 50000), (-50000, 50000)),
+            fields=radar.fields.keys(), gridding_algo="map_gates_to_grid",
+            weighting_function='BARNES', gatefilters = (gatefilter,))
+        dts = num2date(grid.axes['time']['data'], grid.axes['time']['units'])
+        sstr = dts[0].strftime('%Y%m%d_%H%M%S')
+        pyart.io.write_grid(md + 'grid_250_'+sstr+'.nc', grid)
+        fh = open(tf, 'w')
         fh.write('PLOTTING PPI \n')
         fh.close()
         myd = pyart.graph.RadarMapDisplay(radar)
@@ -63,14 +74,6 @@ def do_grid_map_gates_to_grid(radar_fname):
         
         plt.savefig(md+ 'radar_'+sstr+'.png')
         plt.close(fig)
-        grid = pyart.map.grid_from_radars(
-             (radar,), grid_shape=(1, 501, 501),
-            grid_limits=((0, 0),(-50000, 50000), (-50000, 50000)),
-            fields=radar.fields.keys(), gridding_algo="map_gates_to_grid",
-            weighting_function='BARNES', gatefilters = (gatefilter,))
-        dts = num2date(grid.axes['time']['data'], grid.axes['time']['units'])
-        sstr = dts[0].strftime('%Y%m%d_%H%M%S')
-        pyart.io.write_grid(md + 'grid_250_'+sstr+'.nc', grid)
         fig = plt.figure(figsize = [15,15])
         display = pyart.graph.GridMapDisplay(grid)
         display.plot_basemap(lat_lines=np.arange(min_lat,max_lat,.1),
