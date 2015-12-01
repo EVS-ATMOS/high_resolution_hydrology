@@ -114,7 +114,7 @@ while not good:
         good = True
     except:
         print('no!')
-        sleep(5)
+        sleep(15)
         good = False
 
 #Turn off blocking so all engines can work async
