@@ -22,6 +22,10 @@ def do_grid_map_gates_to_grid(radar_fname):
     import os
     md = '/lcrc/group/earthscience/radar/maine_out/'
     try:
+        tf = md + radar_fname.split('/')[-1]
+        fh = open(tf, 'w')
+        fh.write('READING \n')
+        fh.close()
         radar = pyart.io.read(radar_fname)
         gatefilter = pyart.correct.GateFilter(radar)
         gatefilter.exclude_masked('reflectivity')
@@ -39,6 +43,9 @@ def do_grid_map_gates_to_grid(radar_fname):
         min_lon = -72
         max_lon = -69
         max_lat = 45
+        fh = open(tf, 'w')
+        fh.write('PLOTTING PPI \n')
+        fh.close()
         myd = pyart.graph.RadarMapDisplay(radar)
         fig = plt.figure(figsize = [18,10])
         myd.plot_ppi_map( 'rain_z', vmin = 0, vmax = 100, 
@@ -106,7 +113,7 @@ My_View.execute('matplotlib.use("agg")')
 
 
 #Map the code and input to all workers
-result = My_View.map_async(do_grid_map_gates_to_grid, good_files)
+result = My_View.map_async(do_grid_map_gates_to_grid, good_files[0:20])
 
 #Reduce the result to get a list of output
 qvps = result.get()
