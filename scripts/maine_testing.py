@@ -96,14 +96,18 @@ def do_grid_map_gates_to_grid(radar_fname):
     return 0
 
 md = '/lcrc/group/earthscience/radar/nexrad/maine/'
+st = '/lcrc/group/earthscience/radar/maine_out/status/'
 idir = md
 filelist = os.listdir(md)
+status_list = os.listdir(st)
 good_files = []
 for fl in filelist:
     if 'KGYX' in fl:
-        good_files.append(idir + fl)
+        if not(fl + '.status') in status_list:
+            good_files.append(idir + fl)
 good_files.sort()
 
+print(len(good_files), len(filelist))
 good = False
 while not good:
     try:
