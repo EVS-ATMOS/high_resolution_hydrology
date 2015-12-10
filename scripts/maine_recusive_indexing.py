@@ -104,7 +104,7 @@ st = '/lcrc/group/earthscience/radar/maine_out/status/'
 idir = sys.argv[1]
 endswith = sys.argv[2]
 status_list = os.listdir(st)
-filelist =  all_files(idir)
+filelist =   [f for f in all_files(idir)]
 
 good_files = [f for f in all_files(idir)
                if (f.endswith(endswith) \
