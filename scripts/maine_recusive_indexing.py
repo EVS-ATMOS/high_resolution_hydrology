@@ -104,13 +104,11 @@ st = '/lcrc/group/earthscience/radar/maine_out/status/'
 idir = sys.argv[1]
 endswith = sys.argv[2]
 status_list = os.listdir(st)
+filelist =  all_files(idir)
+
 good_files = [f for f in all_files(idir)
                if (f.endswith(endswith) \
                        and not(f.split('/')[-1]+'.status' in status_list))]
-
-
-
-
 
 print(len(good_files), len(filelist))
 good = False
