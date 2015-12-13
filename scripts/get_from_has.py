@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import shutil
 import urllib2
 import tarfile,sys
 import gzip
 import os
-from __future__ import print_function
-opath = sys.argv[0]
-test_loc = sys.argv[1]
+
+opath = sys.argv[1]
+test_loc = sys.argv[2]
 fh =  urllib2.urlopen(test_loc)
 fme = fh.read().split('\n')
 fh.close()
