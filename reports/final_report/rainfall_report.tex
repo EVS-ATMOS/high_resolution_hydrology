@@ -50,33 +50,185 @@ Environmental Science division,
 
 
 
-\abstract{Stuff}
+\abstract{This paper describes a Department of Homeland Security, Regional Resiliency Assessment 
+Program study into precipitation over Portland, Maine carried out by Argonne National Laboratory. The
+ primary data source is scanning weather radar which collects information about precipitating particles
+  over a large (250km plus) domain. The Python ARM radar Toolkit was used to retrieve rainfall rates 
+  from the local radar (in the Gray township outside of Portland) and map them onto a 250m resolution
+   grid over a 100km domain. Using Argonne's large scale cluster, Blues, the problem was mapped to 
+   10 years worth of data, just over 600,000 ten minute volumes or just over 10TB of data. Each time 
+   step was reduced to two numbers: The domain mean and maximum rainfall rate to allow easy 
+   indexing of the data set. In addition the diurnal (daily) cycle of precipitation was studied as was the seasonal cycle. }
 
 \begin{document}
-
 \maketitle
 
 
 \section{Introduction}
 \label{sec:intro}
-More stuff
+Quoting directly from the Department of Homeland Security's (DHS) webpage : \textit{The 
+Regional Resiliency Assessment Program (RRAP) is a cooperative assessment of specific
+ critical infrastructure within a designated geographic area and a regional analysis of the
+surrounding infrastructure. The RRAP is led by the Department of Homeland Security
+and addresses a range of hazards that could have regionally and nationally significant
+ consequences. Each year, the Department selects these voluntary and non-regulatory 
+RRAP projects with input and guidance from federal and state partners.} Argonne is a
+partner in the RRAP project over Portland, Maine. One specific aspect we are looking
+at in critical drainage infrastructure and what will be required in a changing climate
+scenario. Dynamical downscaling (eg \cite{wang}) where a high resolution computer
+ model is used to simulate what happens within the 100km climate model grid cell, 
+ is coming into more common usage. However, the key science question being asked by
+  Argonne researchers is: Is the 12km resolution of these models enough to resolve high intensity  
+localized precipitation events?
 
+To this end our team carried out a study that involves using NOAA weather radars, known as 
+Weather Surveillance Radars -1988 Doppler or WSR-88D (\cite{crum_wsr-88d_1993}) to create high 
+resolution rain maps for ingest into hydrological models. These rain maps are then de-resolved or made 
+coarser and the impact on stream and culvert flow analyzed over the Portland area. This report only 
+deals with the generation of the rain maps and is broken into four sections: This introduction, Background 
+information on the tools used and an introduction to radar meteorology, a discussion of the results obtained 
+and some thoughts as to future work.  
+
+ 
 \section{Backround}
-Background stuff
+Data from the WSR-88D radars are freely available both realtime, archived by the National Centers for 
+Environmental Information and also, recently in the Amazon Cloud. In order to help the reader understand
+the processing that was performed on the radar data to extract geophysical insight we will first give some
+basic background in radar meteorology. 
 
 \subsection{NOAA weather radars}
 \label{ssec:nexrad}
-There   
+The National Weather Service operates a network of 160 radars for the monitoring of atmospheric phenomena. 
+These transmit pluses of radiation and monitor the reflections, or backscatter, of objects in the pulse's path. The
+ radar receives these reflected signals and calculates profiles of data along the path of propagation of the pulse. 
+ If the radar stayed still users will receive just one "soda straw" view through the target of study (eg a rainstorm) 
+ so, in order to map a volume of space the radar is scanned in azimuth (from north) and elevation (from the horizon).
+ This is illustrated in part in fig \ref{fig:radar}. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\columnwidth]{radar_prop.png}
+    \caption{Cartoon of the propagation of the radar beam through a storm, By Vigneron et Pierre cb - Own work, 
+    CC BY-SA 3.0, \href{https://commons.wikimedia.org/w/index.php?curid=4177376}{Link to Wikimedia}}
+    \label{fig:radar}
+\end{figure}
+
+A single sweep through 360 degrees of azimuth is carried out before the elevation angle is changed. This is called a 
+Plan Position Indicator scan or PPI (a historical hangover from when radar images were viewed on cathode ray tube 
+displays). One primary measurement radars collect is how effectively the media (eg raindrops) reflects radiation back
+ and is called Reflectivity Factor often denoted $\mathrm{Z_e}$. We will skip the derivation and description of this 
+ quantity, interested readers are directed to \cite{doviak1984doppler} for more information. An example of a PPI of reflectivity factor is 
+ shown in fig \ref{fig:z}. 
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.4\columnwidth}
+        \includegraphics[width=\columnwidth]{refl.png}
+        \caption{Radar Reflectivity.}
+        \label{fig:z}
+    \end{subfigure}
+     %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.4\columnwidth}
+        \includegraphics[width=\columnwidth]{rainfall.png}
+        \caption{Rainfall rate.}
+        \label{fig:rainfall}
+    \end{subfigure}
+    \caption{Data in the radars native coordinate system of azimuth and range from the lowest elevation sweep of 0.5$^\circ$. }
+\end{figure}
+
+If we assume that the volume of the radar pulse contains a number of rain droplets of varying diameter (D) and can be described 
+as obeying a number distribution $\mathrm{N(D)}$ (so for a particular Diameter you get a density of rain drops in $\mathrm{m^{-3}}$ 
+of N). The reflectivity of raindrops ends up being:
+\begin{align*}
+Z_e = \int{N(D)D^6dD}
+\end{align*}
+or the 6$\mathrm{^{th}}$ moment of the drop size distribution. This means a small number of larger drops has a bigger
+ impact than increasing the density of smaller drops. 
+ 
+ There have been many papers written on the best way to derive rainfall rates from reflectivity factor and other radar variables. 
+ For the purposes of this study where we are more interested in the comparative nature of rainfall patterns we stuck to a simple 
+ parametric fit as presented in \cite{gu_polarimetric_2011} of
+\begin{equation}
+\label{eq:zr}
+ Z_e=300R^{1.4}.
+ \end{equation}
+Equation is inverted to give rainfall rate and an example of this is shown in fig \ref{fig:rainfall}.
 
 \subsection{Application chain}
-chian
+\label{sec:ac}
+The Python-ARM Radar Toolkit (Py-ART, \cite{heistermann_emergence_2014})  is the main
+tool used to perform the steps of: Reading, retrieving rainfall rate, gridding to a 
+cartesian grid and writing to a Community standard file format. 
+Py-ART is a community data-model drive architecture for interactive development
+ of custom processing chains implemented in the Python programming 
+language and makes heavy use of the Scientific Python ecosystem (\cite{scipy}). 
+Py-ART is community based open source software welcoming
+ public contributions on \href{https://github.com/ARM-DOE/pyart}{GitHub}.
+
+Py-ART has a native reader for multiple WSR-88D file formats. The data is read 
+into the Py-ART common data model. Rainfall rate in native (antenna) coordinates
+of range from the radar, azimuth from north and elevation above the horizon is
+ calculated. Then, in order to facilitate easy analysis, the rainfall (in addition to other values) 
+is mapped to a regular Cartesian grid with coordinates of meridional and zonal 
+(east/west, north/south) displacement from the radar location. Mapping is 
+achieved using an inverse distance weighted objective analysis system. Each grid point in the
+ destination grid is assigned a radius of influence. Radar gates falling within that radius are 
+ averaged to that point using a exponential inverse distance weighting (after \cite{barnes_technique_1964}).
+  Py-ART calculates the optimal variable radius of influence. 
+
+Since the radar samples azimuthally the resolution, $R$, of the data 
+varies as a function of distance given by
+
+\begin{equation}
+R = 2d\tan(\frac{1}{2}\theta_{fwhm})
+\end{equation}
+
+where $\theta_{fwhm}$ is the radar beam width and $d$ is the distance of the range gate from the radar. 
+The WSR-88D radars have a beam width of 1 degree so at a distance of 30km the resolution will be approximately
+ 500m. Given we wish to oversample near the city of Portland which is approximately 20km from the radar we chose
+ a grid spacing of 200m resulting in a grid with 501 by 501 elements and a domain of 100km. 
+
+ \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\columnwidth]{mapped.png}
+    \caption{Rainfall rates as shown in fig \ref{fig:rainfall} mapped to a Cartesian grid around the Portland, Maine area.}
+    \label{fig:mapped}
+\end{figure}
+
+Figure \ref{fig:mapped} shows a mapping of rainfall rates calculated in fig \ref{fig:rainfall}. This data is then saved to a NetCDF file that complies 
+with the Climate Forecasting conventions (see http://cfconventions.org/).
+
 
 \subsection{Data informatics}
+Section \ref{sec:ac} gave an overview of the application chain for one volume. Given that our data set consists of hundreds of thousands of files 
+we need an effective way to reduce the problem and map to a large scale cluster. Fortunately, due to the granularity (one granule = one file = one volume) 
+the problem is \textit{pleasantly} parallel. Also fortunately the Scientific Python ecosystem has recently been enhanced by project Jupyter (\cite{jupyter})
+which includes methods for simply mapping a serialized problem to a list of parameters (eg a file list) as shown in fig \ref{fig:cluster}. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\columnwidth]{cluster.png}
+    \caption{pictorial representation of a Jupyter cluster being used for Map-Reduce.  }
+    \label{fig:cluster}
+\end{figure}
+
+Files containing data from the Portland WSR-88D (Code: KGYX) were staged to Argonne's Blues cluster with 310 compute nodes, 
+64 GB of memory on each node, 16 cores per compute node (Intel Sandy Bridge) 4,960 compute cores available and a theoretical
+ peak performance of 107.8 TFlops. Mapping the 670,353 files that made up the study was performed using several jobs ranging from
+ 64 to 1024 cores taking a wall time of just over 48 hours. Each job produced three output files: a NetCDF file containing the gridded data,
+ plots such as those shown in fig \ref{fig:mapped} and a simple ascii file with the mean of the rainfall values in the domain and the 
+ maximum value in the domain.
+ 
 
 
 \section{results}
 The data u
 \subsection{Rainfall look up table}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\columnwidth]{climatology.png}
+    \caption{Domain mean rainfall rate as derived from a reflectivity/rainfall relationship using the KGYX WSR-88D radar. }
+    \label{fig:clim}
+\end{figure}
 lup
 \subsection{Brief analysis of rainfall variability}
 lup
