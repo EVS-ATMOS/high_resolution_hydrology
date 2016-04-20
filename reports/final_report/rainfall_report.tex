@@ -90,7 +90,7 @@ information on the tools used and an introduction to radar meteorology, a discus
 and some thoughts as to future work.  
 
  
-\section{Backround}
+\section{Background}
 Data from the WSR-88D radars are freely available both realtime, archived by the National Centers for 
 Environmental Information and also, recently in the Amazon Cloud. In order to help the reader understand
 the processing that was performed on the radar data to extract geophysical insight we will first give some
@@ -154,7 +154,7 @@ or the 6$\mathrm{^{th}}$ moment of the drop size distribution. This means a smal
  \end{equation}
 Equation is inverted to give rainfall rate and an example of this is shown in fig \ref{fig:rainfall}.
 
-\subsection{Application chain}
+\subsection{Application Chain}
 \label{sec:ac}
 The Python-ARM Radar Toolkit (Py-ART, \cite{heistermann_emergence_2014})  is the main
 tool used to perform the steps of: Reading, retrieving rainfall rate, gridding to a 
@@ -199,7 +199,7 @@ Figure \ref{fig:mapped} shows a mapping of rainfall rates calculated in fig \ref
 with the Climate Forecasting conventions (see http://cfconventions.org/).
 
 
-\subsection{Data informatics}
+\subsection{Data Informatics}
 Section \ref{sec:ac} gave an overview of the application chain for one volume. Given that our data set consists of hundreds of thousands of files 
 we need an effective way to reduce the problem and map to a large scale cluster. Fortunately, due to the granularity (one granule = one file = one volume) 
 the problem is \textit{pleasantly} parallel. Also fortunately the Scientific Python ecosystem has recently been enhanced by project Jupyter (\cite{jupyter})
@@ -220,33 +220,93 @@ Files containing data from the Portland WSR-88D (Code: KGYX) were staged to Argo
  
 
 
-\section{results}
-The data u
+\section{Results}
+Once execution was complete the rainfall grids were archived and the domain mean values were moved off the cluster for analysis (the 
+advantage of reducing several Tb down to ~100Mb). Figure \ref{fig:clim} shows the domain mean rainfall rate (for the domain shown 
+in fig \ref{fig:rainfall}) as a function of time. Since the temporal resolution is of the order of 10 minutes the figure does not have the resolution
+to show individual events. 
 \subsection{Rainfall look up table}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.95\columnwidth]{climatology.png}
+    \includegraphics[width=0.9\columnwidth]{climatology.png}
     \caption{Domain mean rainfall rate as derived from a reflectivity/rainfall relationship using the KGYX WSR-88D radar. }
     \label{fig:clim}
 \end{figure}
-lup
-\subsection{Brief analysis of rainfall variability}
-lup
+For the purposes of RRAP and understanding rainfall over Portland the rainfall rates can act as a look up table to identify
+rainfall events for further study. While domain mean rainfall rate is a crude metric all the grid are archived allowing quick 
+reanalysis. Due to noise in the radar signal and scattering off objects like buildings (called clutter) the minimum signal 
+is 0.05 mm/hr so anything less than this is considered "no rain". 
 
+\subsection{Brief Analysis of Rainfall Variability}
+We can look at the temporal distribution of rainfall by partitioning it into hourly and monthly percentiles and means. 
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\columnwidth]{var.png}
+    \caption{Rainfall statistics broken down into hourly and monthly distributions.  Then left hand side shows percentiles of 
+    rainfall events and the mean.  The right hand side shows, for each hour or month, a histogram of rainfall events using a 
+    colormap. Red colors show high counts blue shows rare events.}
+    \label{fig:var}
+\end{figure}
+Rainfall rates are spilt into separate distributions based on the hour of the day (local time) and the month of the year. 
+Based on these distributions the 25th, median and 75th percentiles of rainfall rate are calculated. These are show in 
+the lefthand panels of fig \ref{fig:var}. In addition, histograms of the rainfall rate for each hour and month are calculated 
+and is shown in the right hand panels. Red colors show high counts blue shows rare events. 
+Figure \ref{fig:var} highlights many interesting pattens in Portland rainfall. First, given the mean is much greater than the 
+median we can see that the rainfall distribution is skewed. That is, a greater contribution towards total rainfall comes 
+from the more extreme events than the weaker events. 
+The figure also shows a clear diurnal (or daily) cycle with an overnight maximum. This is consistent with many studies 
+of rainfall across the globe (eg \cite{nesbitt_diurnal_2003}). This is due to the most widespread systems being more 
+intense at night, the physical mechanisms are beyond the scope of this report but it is pleasing to see an expected 
+natural and physically consistent variation apparent in the data. 
+The monthly data shows a clear seasonal cycle with the percentiles exhibiting a fall and spring peak. However inspection
+ of the mean and histograms to the right shows that while mid-scale events are more populous in spring and fall higher end 
+ events occur in summer as well. 
 
-\section{Future work}
-The climatology and varianc
+\section{Conclusions and Future Work}
+Ten years of radar data from Portland, Maine, were used to construct a decade's worth or rainfall rate grids. These grids have 
+been handed over to the hydrology group at Argonne and will be used to investigate the scale dependance of rainfall. For each 
+grid the domain mean rainfall was calculated both as a health and status monitor and as a look up table to quickly find events of 
+interest to the team. This data turned out to be interesting in its own right. The rainfall record shows interesting daily and monthly 
+cycles with an overnight maximum  and spring and fall peaks. The rainfall record is also highly skewed with the median rainfall rate
+being much less than the mean. This indicates that Maine gets much of its rainfall from heavier events. 
+
+This rainfall retrieval technique outlined in sec \ref{ssec:nexrad} was crude as the initial aim of the study was purely to create grids 
+for use in the hydrological modeling.  In the future we wish to improve the quality control of the data to filter out various phenomena 
+that corrupt the data and to also detect the presence of snow and treat it differently to rain. The retrieval and cluster framework is 
+already set up (see \href{https://github.com/scollis/high_resolution_hydrology}{this link to the GitHub repository})
+ so improvements can be made and rerunning the climatology is only a matter of core hours.
+ 
+There are two main areas for future work beyond quality control improvements: Comparison with regional downscaling hindcasts and 
+the development of more sophisticated metrics than just domain mean. 
+
+Signatures apparent in fig \ref{fig:var} should also be present in rainfall produced by regionally downscaled climate models. We are already 
+working with scientists here at Argonne comparing our radar measurements to that produced by forcing high resolution models with the 
+CMIP5 climate models. The period of overlap is from 1995 to 2005. NEXRAD is only reliable after 1995 (getting considerably better in 2001 in 
+terms of uptime) and CMIP5 only goes to 2005. We are performing this study both over Portland and Oklahoma where the DoE Atmospheric 
+Radiation Measurement Research program has extensive instrumentation \cite{ackerman_atmospheric_2003}. These studies become more 
+important as the climate modeling community gears up for CMIP6, where we will have a much greater overlap between the hindcast and radar
+ data. Radar climatologies like those presented in this report will be key for testing the veracity of various downscaling methodologies. 
+ 
+As mentioned previously in this report domain mean rainfall is a simple but not sufficient way to index the contents of the rainfall grids. We wish 
+to extend this study to identify "fingerprints of severity" in the rainfall grids. An example would be the area of the grid over a certain rainfall rate 
+threshold. We then wish to collect information from atmospheric reanalyses (such as atmospheric instability indexes) to do an ingredients based 
+study into what causes extreme rainfall in Maine. We can then look at climate models and see if these ingredients will be more or less likely in 
+future climate scenarios thus enabling us to make data driven comments on the likelihood of extreme rainfall in the Portland area going forward. 
 
 %%%%%%%%%%%%%%%%%
 %ACKNOWLEDGMENTS
 %%%%%%%%%%%%%%%%%
 
 \acknowledgments{}
-
-Scott G
-
-Patricia
-
+This report has been created by UChicago Argonne, LLC, Operator of Argonne National Laboratory ("Argonne"). 
+Argonne, a U.S. Department of Energy Office of Science laboratory, is operated under Contract No. DE-AC02-06CH11357. 
+This research was supported by the Office of Biological and Environmental Research of the U.S. Department of Energy as
+ part of the Atmospheric Radiation Measurement Climate Research Facility and the Department of Homeland Security
+ Regional Resiliency Assessment Program. We gratefully acknowledge the computing resources provided on Blues,
+ a high-performance computing cluster operated by the Laboratory Computing Resource Center at Argonne National Laboratory.
+ 
+ We wish to thank Duane Verner and Eugene Yan for useful discussions during this work and Jonathan Helmus for his tireless support 
+ of Py-ART. We also wish to thank all the contributors to Py-ART and the Scientific Python Ecosystem. 
 %%%%%%%%%%%%%%%%%
 %APPENDIXES
 %%%%%%%%%%%%%%%%%
