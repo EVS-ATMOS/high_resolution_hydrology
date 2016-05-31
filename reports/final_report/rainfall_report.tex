@@ -250,7 +250,13 @@ We can look at the temporal distribution of rainfall by partitioning it into hou
 Rainfall rates are spilt into separate distributions based on the hour of the day (local time) and the month of the year. 
 Based on these distributions the 25th, median and 75th percentiles of rainfall rate are calculated. These are show in 
 the lefthand panels of fig \ref{fig:var}. In addition, histograms of the rainfall rate for each hour and month are calculated 
-and is shown in the right hand panels. Red colors show high counts blue shows rare events. 
+and is shown in the right hand panels. These histograms are stacked in time, so all the rainfall rates for a month (say, March) 
+are grouped and then the rates are sorted into bins. The first bin is 0.1 to 0.2 mm/h so there will be a certain number of times 
+we observe that rain rate, in the month of March, in our study, it was ~1000 samples giving it the red color in fig \ref{fig:var}. 
+A sample is a single radar measurement which occurs approximately every 10 minutes. Very high rainfall values happen 
+less frequently. For example, domain mean rainfall rates of 2.9 to 3.0 mm/h in the month of March only occurs 10 times
+(note the color scale in fig \ref{fig:var} us logarithmic). Individual histograms for 10-11pm and for the month of October are shown in 
+fig \ref{fig:hists}.
 Figure \ref{fig:var} highlights many interesting pattens in Portland rainfall. First, given the mean is much greater than the 
 median we can see that the rainfall distribution is skewed. That is, a greater contribution towards total rainfall comes 
 from the more extreme events than the weaker events. 
@@ -261,6 +267,17 @@ natural and physically consistent variation apparent in the data.
 The monthly data shows a clear seasonal cycle with the percentiles exhibiting a fall and spring peak. However inspection
  of the mean and histograms to the right shows that while mid-scale events are more populous in spring and fall higher end 
  events occur in summer as well. 
+ 
+ \begin{figure}
+    \centering
+    \includegraphics[width=0.8\columnwidth]{hists.png}
+    \caption{Histograms of domain mean rainfall rates for 10pm to 11pm at night (top) and the month of October (bottom). }
+    \label{fig:hists}
+\end{figure}
+ 
+ So far the scope of our work has been limited to investigating bulk statistics. In order to look at trends and to comment on if 
+ heavy precipitation events are increasing would entail more rigorous data quality work to ensure technical issues do not lead 
+ to erroneous findings. 
 
 \section{Conclusions and Future Work}
 Ten years of radar data from Portland, Maine, were used to construct a decade's worth or rainfall rate grids. These grids have 
@@ -286,12 +303,18 @@ terms of uptime) and CMIP5 only goes to 2005. We are performing this study both 
 Radiation Measurement Research program has extensive instrumentation \cite{ackerman_atmospheric_2003}. These studies become more 
 important as the climate modeling community gears up for CMIP6, where we will have a much greater overlap between the hindcast and radar
  data. Radar climatologies like those presented in this report will be key for testing the veracity of various downscaling methodologies. 
+
+As previously mentioned we limited our investigations to looking at bulk means and monthly and daily cycles of precipitation. More detailed investigations
+ into the quality of the data and the application of very careful statistical analysis may allow trends to be investigated, including comparisons with the 
+ National Climate Assessment (\cite{climchange}), specifically with figure 2.18. 
  
 As mentioned previously in this report domain mean rainfall is a simple but not sufficient way to index the contents of the rainfall grids. We wish 
 to extend this study to identify "fingerprints of severity" in the rainfall grids. An example would be the area of the grid over a certain rainfall rate 
 threshold. We then wish to collect information from atmospheric reanalyses (such as atmospheric instability indexes) to do an ingredients based 
 study into what causes extreme rainfall in Maine. We can then look at climate models and see if these ingredients will be more or less likely in 
 future climate scenarios thus enabling us to make data driven comments on the likelihood of extreme rainfall in the Portland area going forward. 
+
+
 
 %%%%%%%%%%%%%%%%%
 %ACKNOWLEDGMENTS
